@@ -33,7 +33,7 @@ jobs:
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
         run: |
-          python get_ticker_list_by_exchange.py
+          python exchanges_tickers_types.py
 
       - name: Commit and push if changed
         run: |
