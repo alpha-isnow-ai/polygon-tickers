@@ -10,10 +10,14 @@ on:
 jobs:
   update-tickers:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required for pushing to the repository
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history for proper git operations
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v4
@@ -30,7 +34,6 @@ jobs:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
         run: |
           python get_ticker_list_by_exchange.py
-          python betting_against_beta.py
 
       - name: Commit and push if changed
         run: |
@@ -38,4 +41,6 @@ jobs:
           git config --local user.name "GitHub Action"
           git add exchange_tickers.json tickers_with_type.json nyse_nasdaq_tickers.json nyse_nasdaq_tickers_etf.json nyse_nasdaq_tickers_cs.json
           git diff --quiet && git diff --staged --quiet || git commit -m "Update ticker data on $(date)"
-          git push
+          git push origin HEAD:${GITHUB_REF}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
