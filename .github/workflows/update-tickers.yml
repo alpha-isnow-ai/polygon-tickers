@@ -8,7 +8,26 @@ on:
     - cron: "0 1 1 1,4,7,10 *"
 
 jobs:
+  check-commit-message:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check-message.outputs.should_run }}
+    steps:
+      - name: Check if commit message contains trigger keyword
+        id: check-message
+        run: |
+          # Check if the commit message contains [update-tickers] keyword
+          if echo "${{ github.event.head_commit.message }}" | grep -i "\[update-tickers\]"; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+            echo "Commit message does not contain the trigger keyword [update-tickers]"
+          fi
+
   update-tickers:
+    needs: check-commit-message
+    if: github.event_name == 'schedule' || needs.check-commit-message.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write # Required for pushing to the repository
@@ -33,13 +52,14 @@ jobs:
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
         run: |
-          python exchanges_tickers_types.py
+          python get_ticker_list_by_exchange.py
+          python betting_against_beta.py
 
       - name: Commit and push if changed
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add *.json
+          git add exchange_tickers.json tickers_with_type.json nyse_nasdaq_tickers.json nyse_nasdaq_tickers_etf.json nyse_nasdaq_tickers_cs.json
           git diff --quiet && git diff --staged --quiet || git commit -m "Update ticker data on $(date)"
           git push origin HEAD:${GITHUB_REF}
         env:

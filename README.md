@@ -44,6 +44,14 @@ This project facilitates quick access to ticker symbols for strategies running i
    POLYGON_API_KEY=your_api_key_here
    ```
 
+## How to trigger the update-tickers workflow explicitly
+
+To trigger the update-tickers workflow explicitly, you can push a commit with the following message:
+
+```
+[update-tickers]
+```
+
 ## Usage
 
 Run the main script to collect ticker information:
