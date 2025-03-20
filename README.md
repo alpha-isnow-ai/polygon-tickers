@@ -73,7 +73,7 @@ The ticker data is automatically updated quarterly through CI workflows to ensur
 
 ## License
 
-[Insert your license here]
+This project is licensed under the MIT License. See the [MIT](https://opensource.org/licenses/MIT) file for details.
 
 ## Contributing
 
